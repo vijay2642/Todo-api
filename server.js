@@ -28,7 +28,7 @@ app.get('/todos/:id', function(req, res) {
     //res.send('requested todo id : '+req.params.id);
     var element = {};
     todos.forEach(function(val) {
-        if (val.id == req.params.id) {
+        if (val.id === parseInt(req.params.id)) {
             element = val;
         };
     });
