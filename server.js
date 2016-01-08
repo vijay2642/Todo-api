@@ -1,23 +1,23 @@
 var express = require("express");
 var bodyparser = require("body-parser");
+var _ = require("underscore");
 var app = express();
 var port = process.env.PORT || 3000;
 
-// var todos = [{
-//     id: 1,
-//     description: 'Learning todo api using node.js...',
-//     completed: 'false'
-// }, {
-//     id: 2,
-//     description: 'will Learn Data Structures and Algorithms...',
-//     completed: 'false'
-// }, {
-//     id: 3,
-//     description: 'Learned Javascript the iwerd parts...',
-//     completed: 'true'
-// }]
+var todos = [{
+    id: 1,
+    description: 'Learning todo api using node.js...',
+    completed: 'false'
+}, {
+    id: 2,
+    description: 'will Learn Data Structures and Algorithms...',
+    completed: 'false'
+}, {
+    id: 3,
+    description: 'Learned Javascript the iwerd parts...',
+    completed: 'true'
+}]
 
-var todos = [];
 var todoId = 1;
 
 app.use(bodyparser.json());
@@ -31,14 +31,20 @@ app.get('/todos', function(req, res) {
 });
 
 app.get('/todos/:id', function(req, res) {
-    //res.send('requested todo id : '+req.params.id);
-    var element = {};
-    todos.forEach(function(val) {
-        if (val.id === parseInt(req.params.id)) {
-            element = val;
-        };
-    });
-    if(Object.keys(element).length == 0){
+  
+    // todos.forEach(function(val) {
+    //     if (val.id === parseInt(req.params.id)) {
+    //         element = val;
+    //     };
+    // });
+    var body = req.body;
+    if(!_.isBoolean(body.completed || !_.isString(body.description))){
+        res.status(400).send();
+    }
+    
+    var element = _.findWhere(todos,{id: parseInt(req.params.id) });
+    
+    if(!element){
         res.status(404).send('Request object not found in server...');
     }else{
     res.json(element);
