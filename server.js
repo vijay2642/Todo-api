@@ -1,20 +1,26 @@
 var express = require("express");
+var bodyparser = require("body-parser");
 var app = express();
 var port = process.env.PORT || 3000;
 
-var todos = [{
-    id: 1,
-    description: 'Learn todo api using node.js...',
-    completed: 'false'
-}, {
-    id: 2,
-    description: 'Learn Data Structures and Algorithms...',
-    completed: 'false'
-}, {
-    id: 3,
-    description: 'Learn Javascript the iwerd parts...',
-    completed: 'true'
-}]
+// var todos = [{
+//     id: 1,
+//     description: 'Learning todo api using node.js...',
+//     completed: 'false'
+// }, {
+//     id: 2,
+//     description: 'will Learn Data Structures and Algorithms...',
+//     completed: 'false'
+// }, {
+//     id: 3,
+//     description: 'Learned Javascript the iwerd parts...',
+//     completed: 'true'
+// }]
+
+var todos = [];
+var todoId = 1;
+
+app.use(bodyparser.json());
 
 app.get('/', function(req, res) {
     res.send('Todo API  welcomes you!!!');
@@ -39,6 +45,14 @@ app.get('/todos/:id', function(req, res) {
     }
 });
 
+app.post('/todos', function(req,res) {
+   
+   var body = req.body;
+   body.id = todoId++ ;
+   todos.push(body);
+   res.send(body);
+   
+});
 
 app.listen(port, function(req, res) {
     console.log("Express Todo web server started...");
