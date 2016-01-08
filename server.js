@@ -37,10 +37,8 @@ app.get('/todos/:id', function(req, res) {
     //         element = val;
     //     };
     // });
+    
     var body = req.body;
-    if(!_.isBoolean(body.completed || !_.isString(body.description))){
-        res.status(400).send();
-    }
     
     var element = _.findWhere(todos,{id: parseInt(req.params.id) });
     
@@ -53,8 +51,13 @@ app.get('/todos/:id', function(req, res) {
 
 app.post('/todos', function(req,res) {
    
-   var body = req.body;
-   body.id = todoId++ ;
+   var body = _.pick(req.body, 'description','completed');
+   
+   if(!_.isBoolean(body.completed || !_.isString(body.description))){
+        res.status(400).send();
+    }
+    
+   body.id = todoId++ ; body.description = body.description.trim();
    todos.push(body);
    res.send(body);
    
