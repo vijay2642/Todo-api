@@ -25,6 +25,18 @@ app.get('/todos', function(req, res) {
    res.json(todos); 
 });
 
+app.get('/todos/:id', function(req, res) {
+    //res.send('requested todo id : '+req.params.id);
+    var element = {};
+    todos.forEach(function(val) {
+       if(val.id == req.params.id){
+            element = val;
+       };
+    });
+    res.json(element);
+});
+
+
 app.listen(port, function(req,res) {
     console.log("Express Todo web server started...");
 });
