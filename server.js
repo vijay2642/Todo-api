@@ -31,37 +31,60 @@ app.get('/todos', function(req, res) {
 });
 
 app.get('/todos/:id', function(req, res) {
-  
+
     // todos.forEach(function(val) {
     //     if (val.id === parseInt(req.params.id)) {
     //         element = val;
     //     };
     // });
-    
+
     var body = req.body;
-    
-    var element = _.findWhere(todos,{id: parseInt(req.params.id) });
-    
-    if(!element){
+
+    var element = _.findWhere(todos, {
+        id: parseInt(req.params.id)
+    });
+
+    if (!element) {
         res.status(404).send('Request object not found in server...');
-    }else{
-    res.json(element);
+    }
+    else {
+        res.json(element);
     }
 });
 
-app.post('/todos', function(req,res) {
-   
-   var body = _.pick(req.body, 'description','completed');
-   
-   if(!_.isBoolean(body.completed || !_.isString(body.description))){
+app.post('/todos', function(req, res) {
+
+    var body = _.pick(req.body, 'description', 'completed');
+
+    if (!_.isBoolean(body.completed || !_.isString(body.description))) {
         res.status(400).send();
     }
-    
-   body.id = todoId++ ; body.description = body.description.trim();
-   todos.push(body);
-   res.send(body);
-   
+
+    body.id = todoId++;
+    body.description = body.description.trim();
+    todos.push(body);
+    res.send(body);
 });
+
+
+app.delete('/todos/:id', function(req, res) {
+    var body = req.body;
+    var todoId = parseInt(req.params.id);
+    var obj = _.findWhere(todos, {
+        id: todoId
+    });
+
+    if (!obj) {
+        res.status(404).json({ "error": "Requested id not found" });
+    }
+    else {
+        todos = _.without(todos, obj);
+        res.send(todos);
+    }
+});
+
+
+
 
 app.listen(port, function(req, res) {
     console.log("Express Todo web server started...");
