@@ -75,7 +75,9 @@ app.delete('/todos/:id', function(req, res) {
     });
 
     if (!obj) {
-        res.status(404).json({ "error": "Requested id not found" });
+        res.status(404).json({
+            "error": "Requested id not found"
+        });
     }
     else {
         todos = _.without(todos, obj);
@@ -83,7 +85,34 @@ app.delete('/todos/:id', function(req, res) {
     }
 });
 
+app.put('/todos/:id', function(req, res) {
+    var todoId = parseInt(req.params.id);
+    var body = _.pick(req.body,'description','completed');
+    var matchedbody = _.findWhere(todos,{id: todoId});
+    var validProperties = {};
+    
+    if(!matchedbody){
+        res.status(404).send();
+    }
 
+    if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
+        validProperties.completed = body.completed;
+    }
+    else if(body.hasOwnProperty('completed')) {
+       return res.status(400).send();
+    }
+    
+    if (body.hasOwnProperty('description') && _.isString(body.description)) {
+        validProperties.description = body.description;
+    }
+    else if(body.hasOwnProperty('description')) {
+        return res.status(400).send();
+    }
+    
+    
+    _.extend(matchedbody,validProperties);
+    res.send('Values updated');
+});
 
 
 app.listen(port, function(req, res) {
