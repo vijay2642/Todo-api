@@ -27,16 +27,31 @@ app.get('/', function(req, res) {
 });
 
 app.get('/todos', function(req, res) {
-    res.json(todos);
+    var queryParams = req.query;
+    var filteredTodos;
+    //var body = req.body;
+    if (queryParams.hasOwnProperty('completed') && (queryParams.completed === 'true')) {
+        filteredTodos = _.where(todos, {
+            completed: queryParams.completed
+        });
+    }
+    else if ((queryParams.hasOwnProperty('completed') && (queryParams.completed === 'false'))) {
+        filteredTodos = _.where(todos, {
+            completed: queryParams.completed
+        });
+    }
+
+    // search by description
+    if (queryParams.hasOwnProperty('description') && _.isString(queryParams.description) && queryParams.description.length > 0) {
+        filteredTodos = _.filter(filteredTodos, function(val) {
+            return val.description.indexOf(queryParams.description) > -1;
+        });
+    }
+
+    res.json(filteredTodos);
 });
 
 app.get('/todos/:id', function(req, res) {
-
-    // todos.forEach(function(val) {
-    //     if (val.id === parseInt(req.params.id)) {
-    //         element = val;
-    //     };
-    // });
 
     var body = req.body;
 
@@ -87,30 +102,31 @@ app.delete('/todos/:id', function(req, res) {
 
 app.put('/todos/:id', function(req, res) {
     var todoId = parseInt(req.params.id);
-    var body = _.pick(req.body,'description','completed');
-    var matchedbody = _.findWhere(todos,{id: todoId});
+    var body = _.pick(req.body, 'description', 'completed');
+    var matchedbody = _.findWhere(todos, {
+        id: todoId
+    });
     var validProperties = {};
-    
-    if(!matchedbody){
+
+    if (!matchedbody) {
         res.status(404).send();
     }
 
     if (body.hasOwnProperty('completed') && _.isBoolean(body.completed)) {
         validProperties.completed = body.completed;
     }
-    else if(body.hasOwnProperty('completed')) {
-       return res.status(400).send();
+    else if (body.hasOwnProperty('completed')) {
+        return res.status(400).send();
     }
-    
+
     if (body.hasOwnProperty('description') && _.isString(body.description)) {
         validProperties.description = body.description;
     }
-    else if(body.hasOwnProperty('description')) {
+    else if (body.hasOwnProperty('description')) {
         return res.status(400).send();
     }
-    
-    
-    _.extend(matchedbody,validProperties);
+
+    _.extend(matchedbody, validProperties);
     res.send('Values updated');
 });
 
