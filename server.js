@@ -3,6 +3,7 @@ var bodyparser = require("body-parser");
 var _ = require("underscore");
 var app = express();
 var port = process.env.PORT || 3000;
+var db = require('./db.js');
 
 var todos = [{
     id: 1,
@@ -52,33 +53,35 @@ app.get('/todos', function(req, res) {
 });
 
 app.get('/todos/:id', function(req, res) {
+    var todoid = parseInt(req.params.id);
 
-    var body = req.body;
-
-    var element = _.findWhere(todos, {
-        id: parseInt(req.params.id)
+    db.Todo.findById(todoid).then(function(todo) {
+        if (todo) {
+            res.json(todo.toJSON());
+        }
+        else {
+            res.status(404).send();
+        }
+    }).catch(function(error) {
+        res.status(500).send(error);
     });
-
-    if (!element) {
-        res.status(404).send('Request object not found in server...');
-    }
-    else {
-        res.json(element);
-    }
 });
+
+
 
 app.post('/todos', function(req, res) {
 
     var body = _.pick(req.body, 'description', 'completed');
 
-    if (!_.isBoolean(body.completed || !_.isString(body.description))) {
-        res.status(400).send();
-    }
+    db.Todo.create(body).then(function(todo) {
+        console.log('Data posted successfully');
+        console.log(todo);
+        res.json(todo);
+    }).catch(function(error) {
+        console.log(error);
+        res.status(400).json(error);
+    })
 
-    body.id = todoId++;
-    body.description = body.description.trim();
-    todos.push(body);
-    res.send(body);
 });
 
 
@@ -130,7 +133,8 @@ app.put('/todos/:id', function(req, res) {
     res.send('Values updated');
 });
 
-
-app.listen(port, function(req, res) {
-    console.log("Express Todo web server started...");
+db.sequelize.sync().then(function() {
+    app.listen(port, function(req, res) {
+        console.log("Express Todo web server started...");
+    });
 });
