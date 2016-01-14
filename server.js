@@ -5,7 +5,7 @@ var app = express();
 var port = process.env.PORT || 3000;
 var db = require('./db.js');
 
-var todos = [{
+var todos1 = [{
     id: 1,
     description: 'Learning todo api using node.js...',
     completed: 'false'
@@ -91,7 +91,7 @@ app.post('/todos', function(req, res) {
 app.delete('/todos/:id', function(req, res) {
     var body = req.body;
     var todoId = parseInt(req.params.id);
-    var obj = _.findWhere(todos, {
+    var obj = _.findWhere(todos1, {
         id: todoId
     });
 
@@ -101,15 +101,15 @@ app.delete('/todos/:id', function(req, res) {
         });
     }
     else {
-        todos = _.without(todos, obj);
-        res.send(todos);
+        todos1 = _.without(todos1, obj);
+        res.send(todos1);
     }
 });
 
 app.put('/todos/:id', function(req, res) {
     var todoId = parseInt(req.params.id);
     var body = _.pick(req.body, 'description', 'completed');
-    var matchedbody = _.findWhere(todos, {
+    var matchedbody = _.findWhere(todos1, {
         id: todoId
     });
     var validProperties = {};
