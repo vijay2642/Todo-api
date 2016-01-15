@@ -103,20 +103,6 @@ app.delete('/todos/:id', function(req, res) {
     }).catch(function(error){
         res.status(500).send(error);
     });
-    // var todoId = parseInt(req.params.id);
-    // var obj = _.findWhere(todos1, {
-    //     id: todoId
-    // });
-
-    // if (!obj) {
-    //     res.status(404).json({
-    //         "error": "Requested id not found"
-    //     });
-    // }
-    // else {
-    //     todos1 = _.without(todos1, obj);
-    //     res.send(todos1);
-    // }
 });
 
 app.put('/todos/:id', function(req, res) {
