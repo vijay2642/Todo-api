@@ -33,7 +33,7 @@ app.get('/todos', function(req, res) {
     db.todo.findAll({
         where: where
     }).then(function(todos) {
-            res.json(todos);
+        res.json(todos);
     }).catch(function(error) {
         res.status(500).send();
     });
@@ -75,17 +75,24 @@ app.post('/todos', function(req, res) {
 
 app.delete('/todos/:id', function(req, res) {
     var body = req.body;
-    
+
     var id = parseInt(req.params.id);
-    var where = { id : id};
-    
-    db.todo.destroy({where : where}).then(function(affectedRows) {
-        if(affectedRows > 0) {
-        res.send(affectedRows +' Rows are deleted');
-        } else {
-            res.status(404).json({error:'No records found!!!'});
+    var where = {
+        id: id
+    };
+
+    db.todo.destroy({
+        where: where
+    }).then(function(affectedRows) {
+        if (affectedRows > 0) {
+            res.send(affectedRows + ' Rows are deleted');
         }
-    }).catch(function(error){
+        else {
+            res.status(404).json({
+                error: 'No records found!!!'
+            });
+        }
+    }).catch(function(error) {
         res.status(500).send(error);
     });
 });
@@ -93,25 +100,26 @@ app.delete('/todos/:id', function(req, res) {
 app.put('/todos/:id', function(req, res) {
     var todoId = parseInt(req.params.id);
     var body = _.pick(req.body, 'description', 'completed');
-    
+
     var attributes = {};
-    
-    if(body.hasOwnProperty('completed')){
+
+    if (body.hasOwnProperty('completed')) {
         attributes.completed = body.completed;
     }
-    
-    if(body.hasOwnProperty('description')){
+
+    if (body.hasOwnProperty('description')) {
         attributes.description = body.description;
     }
-    
+
     db.todo.findById(todoId).then(function(todo) {
-        if(todo){
-            todo.update(attributes).then(function(todo){
+        if (todo) {
+            todo.update(attributes).then(function(todo) {
                 res.json(todo.toJSON());
-            },function(error) {
+            }, function(error) {
                 res.status(400).json(error);
             })
-        } else { 
+        }
+        else {
             res.status(404).send();
         }
     })
@@ -121,30 +129,36 @@ app.put('/todos/:id', function(req, res) {
 // Users
 app.post('/users', function(req, res) {
     var body = _.pick(req.body, 'email', 'password');
-    
-    db.user.create(body).then(function(user){
+
+    db.user.create(body).then(function(user) {
         res.json(user.toPublicJSON());
-    },function(error){
+    }, function(error) {
         res.status(400).json(error);
     });
 });
 
 
 app.post('/users/login', function(req, res) {
-    var body = _.pick(req.body,'email','password');
-    
-    if(typeof body.email === 'string' && typeof body.password === 'string'){
-        
-        db.user.findOne({where: {email : body.email}}).then(function(user) {
-            if(user && bcrypt.compareSync(body.password,user.get('password_hash'))){
-            res.send(user.email+' user id exists in database');
-            } else {
+    var body = _.pick(req.body, 'email', 'password');
+
+    if (typeof body.email === 'string' && typeof body.password === 'string') {
+
+        db.user.findOne({
+            where: {
+                email: body.email
+            }
+        }).then(function(user) {
+            if (user && bcrypt.compareSync(body.password, user.get('password_hash'))) {
+                res.send(user.email + ' user id exists in database');
+            }
+            else {
                 res.status(401).send('user not found..');
             }
-        },function(error) {
+        }, function(error) {
             res.status(500).json(error);
         });
-    } else {
+    }
+    else {
         res.status(400).send();
     }
 })
