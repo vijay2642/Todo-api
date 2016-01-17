@@ -9,5 +9,13 @@ module.exports = function(sequelize, DataTypes) {
             type: DataTypes.BOOLEAN,
             defaultValue: false
         }
+    },{
+        hooks: {
+            beforeValidate: function(user,options) {
+                if(typeof(user.email) === "string"){
+                    user.email = user.email.toLowerCase();
+                }
+            }
+        }
     })
 };
