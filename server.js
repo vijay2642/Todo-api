@@ -140,27 +140,12 @@ app.post('/users', function(req, res) {
 
 app.post('/users/login', function(req, res) {
     var body = _.pick(req.body, 'email', 'password');
-
-    if (typeof body.email === 'string' && typeof body.password === 'string') {
-
-        db.user.findOne({
-            where: {
-                email: body.email
-            }
-        }).then(function(user) {
-            if (user && bcrypt.compareSync(body.password, user.get('password_hash'))) {
-                res.send(user.email + ' user id exists in database');
-            }
-            else {
-                res.status(401).send('user not found..');
-            }
-        }, function(error) {
-            res.status(500).json(error);
-        });
-    }
-    else {
-        res.status(400).send();
-    }
+    
+    db.user.authenticate(body).then(function(user) {
+        res.json(user.toPublicJSON());
+    }, function(error) {
+        res.status(401).send(error);
+    });
 })
 
 
