@@ -5,6 +5,7 @@ var app = express();
 var port = process.env.PORT || 3000;
 var db = require('./db.js');
 var bcrypt = require("bcrypt");
+var middleware = require('./middleware')(db);
 
 app.use(bodyparser.json());
 
@@ -12,7 +13,7 @@ app.get('/', function(req, res) {
     res.send('Todo API  welcomes you!!!');
 });
 
-app.get('/todos', function(req, res) {
+app.get('/todos',middleware.requireAuthentication, function(req, res) {
     var queryParams = req.query;
 
     var where = {};
@@ -40,7 +41,7 @@ app.get('/todos', function(req, res) {
 });
 
 
-app.get('/todos/:id', function(req, res) {
+app.get('/todos/:id',middleware.requireAuthentication, function(req, res) {
     var todoid = parseInt(req.params.id);
 
     db.todo.findById(todoid).then(function(todo) {
@@ -57,7 +58,7 @@ app.get('/todos/:id', function(req, res) {
 
 
 
-app.post('/todos', function(req, res) {
+app.post('/todos',middleware.requireAuthentication, function(req, res) {
 
     var body = _.pick(req.body, 'description', 'completed');
 
@@ -73,7 +74,7 @@ app.post('/todos', function(req, res) {
 });
 
 
-app.delete('/todos/:id', function(req, res) {
+app.delete('/todos/:id',middleware.requireAuthentication, function(req, res) {
     var body = req.body;
 
     var id = parseInt(req.params.id);
@@ -97,7 +98,7 @@ app.delete('/todos/:id', function(req, res) {
     });
 });
 
-app.put('/todos/:id', function(req, res) {
+app.put('/todos/:id', middleware.requireAuthentication,function(req, res) {
     var todoId = parseInt(req.params.id);
     var body = _.pick(req.body, 'description', 'completed');
 
@@ -127,7 +128,7 @@ app.put('/todos/:id', function(req, res) {
 
 
 // Users
-app.post('/users', function(req, res) {
+app.post('/users',function(req, res) {
     var body = _.pick(req.body, 'email', 'password');
 
     db.user.create(body).then(function(user) {
@@ -138,11 +139,17 @@ app.post('/users', function(req, res) {
 });
 
 
-app.post('/users/login', function(req, res) {
+app.post('/users/login',function(req, res) {
     var body = _.pick(req.body, 'email', 'password');
     
     db.user.authenticate(body).then(function(user) {
-        res.json(user.toPublicJSON());
+        var token = user.generateToken('authentication');
+        if(token){
+            res.header('auth',user.generateToken('authentication')).json(user.toPublicJSON());    
+        } else{
+            res.status(401).send();
+        } 
+        
     }, function(error) {
         res.status(401).send(error);
     });

@@ -1,5 +1,7 @@
 var bcrypt = require('bcrypt');
 var _ = require('underscore');
+var jwt = require('jsonwebtoken');
+var cryptojs = require('crypto-js');
 
 module.exports = function(sequelize, DataTypes) {
     var user = sequelize.define('user', {
@@ -61,12 +63,56 @@ module.exports = function(sequelize, DataTypes) {
                         reject('Bad Request');
                     }
                 });
+            },
+            findByToken: function(token) {
+                return new Promise(function(resolve,reject) {
+                    try{
+                        var decodeJWT = jwt.verify(token,'narmadha');
+                        var bytes = cryptojs.AES.decrypt(decodeJWT.token,'yuvaraj111');
+                        var tokenData = JSON.parse(bytes.toString(cryptojs.enc.Utf8));
+                        
+                        user.findById(tokenData.id).then(function(user) {
+                            if(user){
+                                resolve(user);
+                            }else {
+                                reject();
+                            }
+                        }, function(error){
+                            reject(error);
+                        })
+                    }catch(e){
+                        reject(e);
+                    }
+                })
             }
         },
         instanceMethods: {
             toPublicJSON: function() {
                 var json = this.toJSON();
                 return _.pick(json, 'id', 'email', 'createdAt', 'updatedAt');
+            },
+            generateToken: function(type) {
+
+                if (!type) {
+                    return undefined;
+                }
+                try {
+                    var stringData = JSON.stringify({
+                        id: this.get('id'),
+                        type: type
+                    });
+                    
+                    console.log(stringData);
+                    var encryptedData = cryptojs.AES.encrypt(stringData, 'yuvaraj111').toString();
+                    var token = jwt.sign({
+                        token: encryptedData
+                    }, 'narmadha');
+                    return token;
+                }
+                catch (e) {
+                    console.log(e);
+                    return undefined;
+                }
             }
         }
 
