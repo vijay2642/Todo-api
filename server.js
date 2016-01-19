@@ -170,7 +170,7 @@ app.post('/users/login', function(req, res) {
 
 
 db.sequelize.sync({
-   // force: true
+    force: true
 }).then(function() {
     app.listen(port, function(req, res) {
         console.log("Express Todo web server started...");
